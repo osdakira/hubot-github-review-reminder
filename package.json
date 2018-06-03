@@ -12,7 +12,9 @@
   "bugs": {
     "url": "https://github.com/hubot-scripts/hubot-github-review-reminder/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "githubot": "^1.0.1"
+  },
   "peerDependencies": {
     "hubot": "2.x"
   },
