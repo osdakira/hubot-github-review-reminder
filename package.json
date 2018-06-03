@@ -13,7 +13,8 @@
     "url": "https://github.com/hubot-scripts/hubot-github-review-reminder/issues"
   },
   "dependencies": {
-    "githubot": "^1.0.1"
+    "githubot": "^1.0.1",
+    "lodash": "^4.17.10"
   },
   "peerDependencies": {
     "hubot": "2.x"
