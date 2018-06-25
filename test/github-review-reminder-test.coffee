@@ -7,6 +7,7 @@ helper = new Helper('../src/github-review-reminder.coffee')
 
 describe 'github-review-reminder', ->
   beforeEach ->
+    updated_at = new Date().toISOString()
     @room = helper.createRoom()
     @room.robot.github.get = (url, callback) ->
       callback([
@@ -14,7 +15,8 @@ describe 'github-review-reminder', ->
           title: "pull request title",
           user: { login: "commitGithubName" },
           requested_reviewers: [ login: "reviewerGithubName" ],
-          html_url: "https://github.com/any_url"
+          html_url: "https://github.com/any_url",
+          updated_at: "2018-06-25T00:00:00Z"
         }
       ])
 
@@ -25,14 +27,14 @@ describe 'github-review-reminder', ->
     @room.user.say('bob', 'hubot pull-request reviewers').then =>
       expect(@room.messages).to.eql [
         ['bob', 'hubot pull-request reviewers']
-        ['hubot', "Number awaiting review: reviewerGithubName:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: reviewerGithubName"]
+        ['hubot', "Number awaiting review: reviewerGithubName:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: reviewerGithubName\tLastUpdate: 2018-06-25"]
       ]
 
   it 'Can response with reminder hubot pull-request reviewers', ->
     @room.user.say('bob', 'Reminder: hubot pull-request reviewers.').then =>
       expect(@room.messages).to.eql [
         ['bob', 'Reminder: hubot pull-request reviewers.']
-        ['hubot', "Number awaiting review: reviewerGithubName:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: reviewerGithubName"]
+        ['hubot', "Number awaiting review: reviewerGithubName:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: reviewerGithubName\tLastUpdate: 2018-06-25"]
       ]
 
   it 'convert to slack mention', ->
@@ -42,12 +44,13 @@ describe 'github-review-reminder', ->
     @room.user.say('bob', 'hubot pull-request reviewers').then =>
       expect(@room.messages).to.eql [
         ['bob', 'hubot pull-request reviewers']
-        ['hubot', "Number awaiting review: <@slackId>:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: <@slackId>"]
+        ['hubot', "Number awaiting review: <@slackId>:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: <@slackId>\tLastUpdate: 2018-06-25"]
       ]
 
   it 'After three days, it will fire', ->
     FOUR_DAYS = (1000 * 60 * 60 * 24 * 4)
     updated_at = new Date(new Date().getTime() - FOUR_DAYS).toISOString()
+    updatedDate = updated_at.replace(/T.*/, "")
     @room.robot.github.get = (url, callback) ->
       callback([
         {
@@ -61,5 +64,5 @@ describe 'github-review-reminder', ->
     @room.user.say('bob', 'hubot pull-request reviewers').then =>
       expect(@room.messages).to.eql [
         ['bob', 'hubot pull-request reviewers']
-        ['hubot', "Number awaiting review: reviewerGithubName:1\n\npull request title - commitGithubName: https://github.com/any_url\n\t:fire:reviewers: reviewerGithubName:fire:"]
+        ['hubot', "Number awaiting review: reviewerGithubName:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: reviewerGithubName\tLastUpdate: #{updatedDate}:fire:"]
       ]
