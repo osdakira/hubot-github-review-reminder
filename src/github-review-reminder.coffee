@@ -6,6 +6,7 @@
 #   HUBOT_SLACK_TOKEN
 #   HUBOT_GITHUB_REPO
 #   HUBOT_GITHUB_TO_SLACK_NAME_MAP_KEY
+#   HUBOT_GITHUB_REVIEW_REMINDER_ALLOWABLE_NUMBER_OF_DAYS
 #
 # Commands:
 #   hubot pull-request reviewers
@@ -15,6 +16,9 @@
 #   Akira Osada <osd.akira@gmail.com>
 
 module.exports = (robot) ->
+  ONE_DAY = 1000 * 60 * 60 * 24
+  ALLOWABLE_NUMBER_OF_DAYS =
+    process.env.HUBOT_GITHUB_REVIEW_REMINDER_ALLOWABLE_NUMBER_OF_DAYS ||  3
   _ = require("lodash")
   github = require("githubot")(robot)
   robot.github = github if robot.constructor.name is "MockRobot" # For Test
@@ -41,14 +45,22 @@ module.exports = (robot) ->
 
   _makeSummaries = (pulls) ->
     githubSlackMap = _fetchGithubSlackMap()
+    today = new Date()
     pulls.map (pull) ->
       reviewers = pull.requested_reviewers.map (x) ->
         _convertMention(x.login, githubSlackMap)
       return if reviewers.length == 0
+
+      elapsedDays = _getElapsedDays(today, new Date(pull.updated_at))
+      fires = _.times(elapsedDays - ALLOWABLE_NUMBER_OF_DAYS, -> ":fire:").join("")
       [
         "#{pull.title} - #{pull.user.login}: #{pull.html_url}",
-        "\treviewers: " + reviewers.join(","),
+        "\t#{fires}reviewers: " + reviewers.join(",") + fires,
       ].join("\n")
+
+  _getElapsedDays = (today, updated_at) ->
+    diffMSec = today.getTime() - updated_at.getTime()
+    Math.floor(diffMSec / ONE_DAY)
 
   _makeReviewCounts = (pulls) ->
     githubSlackMap = _fetchGithubSlackMap()
