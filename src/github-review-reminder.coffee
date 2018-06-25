@@ -53,9 +53,10 @@ module.exports = (robot) ->
 
       elapsedDays = _getElapsedDays(today, new Date(pull.updated_at))
       fires = _.times(elapsedDays - ALLOWABLE_NUMBER_OF_DAYS, -> ":fire:").join("")
+      lastUpdatedDate = pull.updated_at.replace(/T.*/,"")
       [
         "#{pull.title} - #{pull.user.login}: #{pull.html_url}",
-        "\t#{fires}reviewers: " + reviewers.join(",") + fires,
+        "\treviewers: #{reviewers.join(",")}\tLastUpdate: #{lastUpdatedDate}#{fires}",
       ].join("\n")
 
   _getElapsedDays = (today, updated_at) ->
