@@ -40,8 +40,10 @@ module.exports = (robot) ->
       res.send message
 
   _makeSummaries = (pulls) ->
+    githubSlackMap = _fetchGithubSlackMap()
     pulls.map (pull) ->
-      reviewers = pull.requested_reviewers.map (x) -> x.login
+      reviewers = pull.requested_reviewers.map (x) ->
+        _convertMention(x.login, githubSlackMap)
       return if reviewers.length == 0
       [
         "#{pull.title} - #{pull.user.login}: #{pull.html_url}",

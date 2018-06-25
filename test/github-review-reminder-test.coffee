@@ -42,5 +42,5 @@ describe 'github-review-reminder', ->
     @room.user.say('bob', 'hubot pull-request reviewers').then =>
       expect(@room.messages).to.eql [
         ['bob', 'hubot pull-request reviewers']
-        ['hubot', "Number awaiting review: <@slackId>:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: reviewerGithubName"]
+        ['hubot', "Number awaiting review: <@slackId>:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: <@slackId>"]
       ]
