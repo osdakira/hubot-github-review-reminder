@@ -42,5 +42,24 @@ describe 'github-review-reminder', ->
     @room.user.say('bob', 'hubot pull-request reviewers').then =>
       expect(@room.messages).to.eql [
         ['bob', 'hubot pull-request reviewers']
-        ['hubot', "Number awaiting review: <@slackId>:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: reviewerGithubName"]
+        ['hubot', "Number awaiting review: <@slackId>:1\n\npull request title - commitGithubName: https://github.com/any_url\n\treviewers: <@slackId>"]
+      ]
+
+  it 'After three days, it will fire', ->
+    FOUR_DAYS = (1000 * 60 * 60 * 24 * 4)
+    updated_at = new Date(new Date().getTime() - FOUR_DAYS).toISOString()
+    @room.robot.github.get = (url, callback) ->
+      callback([
+        {
+          title: "pull request title",
+          user: { login: "commitGithubName" },
+          requested_reviewers: [ login: "reviewerGithubName" ],
+          html_url: "https://github.com/any_url",
+          updated_at: updated_at
+        }
+      ])
+    @room.user.say('bob', 'hubot pull-request reviewers').then =>
+      expect(@room.messages).to.eql [
+        ['bob', 'hubot pull-request reviewers']
+        ['hubot', "Number awaiting review: reviewerGithubName:1\n\npull request title - commitGithubName: https://github.com/any_url\n\t:fire:reviewers: reviewerGithubName:fire:"]
       ]
